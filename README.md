@@ -95,6 +95,31 @@ gwt clean --force
 - Excludes main/master/develop branches
 - Shows branch status before removal
 
+### `gwt switch <branch-name>`
+
+Switch to a worktree interactively with fuzzy search support.
+
+```bash
+gwt switch
+gwt switch feature
+gwt switch --fuzzy
+gwt switch --filter auth
+gwt switch --print
+```
+
+**Aliases:** `sw`
+
+**Options:**
+- `--fuzzy` - Use interactive fuzzy search (like fzf)
+- `--filter <text>` - Filter worktrees by branch name
+- `--print` - Print the selected worktree path instead of switching
+
+**Features:**
+- Interactive selection with numbered options
+- Fuzzy search with real-time filtering
+- Visual status indicators (clean/dirty, ahead/behind)
+- Shell integration support
+
 ### `gwt prune`
 
 Remove administrative files for orphaned worktrees.
@@ -126,14 +151,34 @@ project-root/
 └── main-worktree/        # Main worktree
 ```
 
+## Shell Integration
+
+For seamless directory switching, source the provided shell script:
+
+```bash
+# Add to your .bashrc or .zshrc
+source /path/to/gwt/scripts/gwt-switch.sh
+
+# Now you can use:
+gws                    # Interactive switch
+gwf                    # Fuzzy search
+gwt-switch --filter ui # Filter and switch
+```
+
 ## Examples
 
 ```bash
 # Create a new feature branch worktree
 gwt create feature-auth
 
-# Work in the new worktree
-cd .worktree/feature-auth
+# Switch to a worktree interactively
+gwt switch
+
+# Use fuzzy search to find and switch
+gwt switch --fuzzy
+
+# Filter worktrees and switch
+gwt switch auth
 
 # List all worktrees
 gwt list --verbose
