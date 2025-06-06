@@ -5,10 +5,7 @@ A CLI tool for efficiently managing Git worktrees. Supports parallel work across
 ## Installation
 
 ```bash
-git clone https://github.com/knwoop/gwt.git
-cd gwt
-make build
-make install  # Optional: install to /usr/local/bin
+go install github.com/knwoop/gwt@latest
 ```
 
 ## Commands
