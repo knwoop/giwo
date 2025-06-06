@@ -21,12 +21,13 @@ var listCmd = &cobra.Command{
 	Short:   "List all worktrees",
 	Long:    `Display a list of all worktrees with their status information.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		manager, err := worktree.NewManager()
+		manager, err := worktree.New()
 		if err != nil {
 			return fmt.Errorf("failed to initialize manager: %w", err)
 		}
 
-		worktrees, err := manager.ListWorktrees()
+		ctx := cmd.Context()
+		worktrees, err := manager.List(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to list worktrees: %w", err)
 		}
@@ -38,9 +39,9 @@ var listCmd = &cobra.Command{
 
 		format := worktree.OutputFormat(listFormat)
 		switch format {
-		case worktree.FormatJSON:
+		case worktree.OutputFormatJSON:
 			return printJSON(worktrees)
-		case worktree.FormatSimple:
+		case worktree.OutputFormatSimple:
 			return printSimple(worktrees)
 		default:
 			return printTable(worktrees, listVerbose)
@@ -75,7 +76,7 @@ func printTable(worktrees []*worktree.Worktree, verbose bool) error {
 			}
 
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-				wt.Branch, wt.Path, status, aheadBehind, changes, 
+				wt.Branch, wt.Path, status, aheadBehind, changes,
 				truncateString(wt.LastCommit, 50), wt.CommitAge)
 		}
 	} else {

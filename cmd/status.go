@@ -12,18 +12,19 @@ var statusCmd = &cobra.Command{
 	Short: "Show worktree statistics",
 	Long:  `Display statistics about worktrees and provide recommended actions.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		manager, err := worktree.NewManager()
+		manager, err := worktree.New()
 		if err != nil {
 			return fmt.Errorf("failed to initialize manager: %w", err)
 		}
 
-		worktrees, err := manager.ListWorktrees()
+		ctx := cmd.Context()
+		worktrees, err := manager.List(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to list worktrees: %w", err)
 		}
 
 		stats := calculateStats(worktrees)
-		
+
 		fmt.Println("📊 Worktree Statistics")
 		fmt.Printf("  Total worktrees: %d\n", stats.Total)
 		fmt.Printf("  Active worktrees: %d\n", stats.Active)
@@ -34,7 +35,7 @@ var statusCmd = &cobra.Command{
 			fmt.Printf("\n⚠️  %d worktree(s) have uncommitted changes\n", stats.Dirty)
 		}
 
-		mergedBranches, err := manager.GetMergedBranches()
+		mergedBranches, err := manager.GetMergedBranches(ctx)
 		if err == nil && len(mergedBranches) > 0 {
 			fmt.Printf("\n🧹 %d merged branch(es) can be cleaned up:\n", len(mergedBranches))
 			for _, branch := range mergedBranches {
@@ -51,8 +52,8 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-func calculateStats(worktrees []*worktree.Worktree) worktree.WorktreeStats {
-	stats := worktree.WorktreeStats{
+func calculateStats(worktrees []*worktree.Worktree) worktree.Stats {
+	stats := worktree.Stats{
 		Total: len(worktrees),
 	}
 
@@ -62,7 +63,7 @@ func calculateStats(worktrees []*worktree.Worktree) worktree.WorktreeStats {
 		} else {
 			stats.Active++
 		}
-		
+
 		if !wt.IsClean {
 			stats.Dirty++
 		}
