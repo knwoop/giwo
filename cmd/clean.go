@@ -21,12 +21,13 @@ var cleanCmd = &cobra.Command{
 	Long: `Batch remove worktrees for branches that have been merged into the main branch.
 This excludes main/master/develop branches by default.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		manager, err := worktree.NewManager()
+		manager, err := worktree.New()
 		if err != nil {
 			return fmt.Errorf("failed to initialize manager: %w", err)
 		}
 
-		mergedBranches, err := manager.GetMergedBranches()
+		ctx := cmd.Context()
+		mergedBranches, err := manager.GetMergedBranches(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to get merged branches: %w", err)
 		}
@@ -36,7 +37,7 @@ This excludes main/master/develop branches by default.`,
 			return nil
 		}
 
-		worktrees, err := manager.ListWorktrees()
+		worktrees, err := manager.List(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to list worktrees: %w", err)
 		}
@@ -86,7 +87,7 @@ This excludes main/master/develop branches by default.`,
 		removed := 0
 		for _, branch := range toRemove {
 			fmt.Printf("🗑️  Removing worktree '%s'...\n", branch)
-			if err := manager.RemoveWorktree(branch, true, false); err != nil {
+			if err := manager.Remove(ctx, branch, true, false); err != nil {
 				fmt.Printf("⚠️  Failed to remove '%s': %v\n", branch, err)
 				continue
 			}

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/knwoop/gwt/internal/utils"
@@ -21,46 +22,57 @@ var createCmd = &cobra.Command{
 The worktree will be placed in .worktree/<branch-name> directory and 
 automatically create and switch to the new branch.`,
 	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		branchName := args[0]
-		
-		if err := utils.ValidateBranchName(branchName); err != nil {
-			return fmt.Errorf("invalid branch name: %w", err)
-		}
-		
-		manager, err := worktree.NewManager()
+	RunE: runCreateCommand,
+}
+
+func runCreateCommand(cmd *cobra.Command, args []string) error {
+	ctx := cmd.Context()
+	branchName := args[0]
+
+	if err := utils.ValidateBranchName(branchName); err != nil {
+		return fmt.Errorf("invalid branch name: %w", err)
+	}
+
+	manager, err := worktree.New()
+	if err != nil {
+		return fmt.Errorf("failed to initialize manager: %w", err)
+	}
+
+	baseBranch := createBase
+	if baseBranch == "" {
+		baseBranch, err = determineBaseBranch(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to initialize manager: %w", err)
+			fmt.Printf("⚠️  Warning: failed to determine base branch, using 'main': %v\n", err)
+			baseBranch = "main"
 		}
+	}
 
-		baseBranch := createBase
-		if baseBranch == "" {
-			owner, repo, err := github.GetRepoInfo()
-			if err != nil {
-				fmt.Printf("⚠️  Warning: failed to get repo info, using 'main' as base: %v\n", err)
-				baseBranch = "main"
-			} else {
-				client := github.NewClient()
-				baseBranch, err = client.GetDefaultBranch(owner, repo)
-				if err != nil {
-					fmt.Printf("⚠️  Warning: failed to get default branch, using 'main': %v\n", err)
-					baseBranch = "main"
-				}
-			}
-		}
+	fmt.Printf("🌱 Creating worktree '%s' based on '%s'...\n", branchName, baseBranch)
 
-		fmt.Printf("🌱 Creating worktree '%s' based on '%s'...\n", branchName, baseBranch)
-		
-		if err := manager.CreateWorktree(branchName, baseBranch, createForce); err != nil {
-			return fmt.Errorf("failed to create worktree: %w", err)
-		}
+	if err := manager.Create(ctx, branchName, baseBranch, createForce); err != nil {
+		return fmt.Errorf("failed to create worktree: %w", err)
+	}
 
-		worktreePath := fmt.Sprintf("%s/%s", manager.GetWorktreeDir(), branchName)
-		fmt.Printf("✅ Worktree created successfully at: %s\n", worktreePath)
-		fmt.Printf("💡 Run 'cd %s' to switch to the new worktree\n", worktreePath)
-		
-		return nil
-	},
+	worktreePath := fmt.Sprintf("%s/%s", manager.WorktreeDir(), branchName)
+	fmt.Printf("✅ Worktree created successfully at: %s\n", worktreePath)
+	fmt.Printf("💡 Run 'cd %s' to switch to the new worktree\n", worktreePath)
+
+	return nil
+}
+
+func determineBaseBranch(ctx context.Context) (string, error) {
+	owner, repo, err := github.GetRepoInfo(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get repo info: %w", err)
+	}
+
+	client := github.New()
+	baseBranch, err := client.GetDefaultBranch(ctx, owner, repo)
+	if err != nil {
+		return "", fmt.Errorf("failed to get default branch: %w", err)
+	}
+
+	return baseBranch, nil
 }
 
 func init() {

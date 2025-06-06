@@ -21,15 +21,16 @@ By default, the local branch will be deleted unless --keep-branch is specified.`
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		branchName := args[0]
-		
-		manager, err := worktree.NewManager()
+
+		manager, err := worktree.New()
 		if err != nil {
 			return fmt.Errorf("failed to initialize manager: %w", err)
 		}
 
 		fmt.Printf("🗑️  Removing worktree '%s'...\n", branchName)
-		
-		if err := manager.RemoveWorktree(branchName, removeForce, removeKeepBranch); err != nil {
+
+		ctx := cmd.Context()
+		if err := manager.Remove(ctx, branchName, removeForce, removeKeepBranch); err != nil {
 			return fmt.Errorf("failed to remove worktree: %w", err)
 		}
 
@@ -38,7 +39,7 @@ By default, the local branch will be deleted unless --keep-branch is specified.`
 		} else {
 			fmt.Printf("✅ Worktree and branch removed successfully\n")
 		}
-		
+
 		return nil
 	},
 }
