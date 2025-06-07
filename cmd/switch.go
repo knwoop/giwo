@@ -11,25 +11,25 @@ import (
 )
 
 var (
-	switchFilter string
-	switchPrint  bool
-	switchFuzzy  bool
+	switchFilter   string
+	switchPrint    bool
+	switchSelector bool
 )
 
 var switchCmd = &cobra.Command{
 	Use:     "switch [filter]",
 	Aliases: []string{"sw"},
 	Short:   "Switch to a worktree interactively",
-	Long: `Switch to a worktree using an interactive selector.
-If a filter is provided, only worktrees matching the filter will be shown.
-Use --fuzzy for an interactive fuzzy search interface similar to fzf.`,
+	Long: `Switch to a worktree using an interactive fuzzy search interface.
+By default, shows all worktrees with real-time incremental filtering.
+Use --selector for the classic numbered list interface instead.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runSwitchCommand,
 }
 
 func runSwitchCommand(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
-	
+
 	manager, err := worktree.New()
 	if err != nil {
 		return fmt.Errorf("failed to initialize manager: %w", err)
@@ -47,11 +47,8 @@ func runSwitchCommand(cmd *cobra.Command, args []string) error {
 
 	var selected *worktree.Worktree
 
-	// Use fuzzy search if requested
-	if switchFuzzy {
-		fuzzyFinder := ui.NewFuzzyFinder(worktrees)
-		selected, err = fuzzyFinder.Search()
-	} else {
+	// Use classic selector if requested, otherwise default to fuzzy search
+	if switchSelector {
 		// Get filter from args or flag
 		filter := switchFilter
 		if len(args) > 0 {
@@ -59,14 +56,18 @@ func runSwitchCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		selector := ui.NewSelector(worktrees)
-		
+
 		if filter != "" {
 			selected, err = selector.SelectWithFilter(filter)
 		} else {
 			selected, err = selector.Select()
 		}
+	} else {
+		// Default to fuzzy search
+		fuzzyFinder := ui.NewFuzzyFinder(worktrees)
+		selected, err = fuzzyFinder.Search()
 	}
-	
+
 	if err != nil {
 		return fmt.Errorf("selection failed: %w", err)
 	}
@@ -95,11 +96,11 @@ func runSwitchCommand(cmd *cobra.Command, args []string) error {
 
 	// Try to change directory using a subshell
 	fmt.Printf("🔄 Switching to worktree '%s' at %s\n", selected.Branch, selected.Path)
-	
+
 	// Since we can't change the parent shell's directory from a child process,
 	// we'll provide instructions to the user
 	fmt.Printf("💡 Run: cd %s\n", selected.Path)
-	
+
 	// Optionally, try to open a new shell in the directory
 	if err := openShellInDirectory(selected.Path); err != nil {
 		// If opening a new shell fails, that's okay - we've already given instructions
@@ -130,7 +131,7 @@ func openShellInDirectory(path string) error {
 }
 
 func init() {
-	switchCmd.Flags().StringVarP(&switchFilter, "filter", "f", "", "Filter worktrees by branch name")
+	switchCmd.Flags().StringVarP(&switchFilter, "filter", "f", "", "Filter worktrees by branch name (only used with --selector)")
 	switchCmd.Flags().BoolVarP(&switchPrint, "print", "p", false, "Print the selected worktree path instead of switching")
-	switchCmd.Flags().BoolVar(&switchFuzzy, "fuzzy", false, "Use interactive fuzzy search (like fzf)")
+	switchCmd.Flags().BoolVar(&switchSelector, "selector", false, "Use classic numbered selector instead of fuzzy search")
 }

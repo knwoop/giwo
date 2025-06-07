@@ -55,7 +55,7 @@ func (s *Selector) Select() (*worktree.Worktree, error) {
 	}
 
 	input = strings.TrimSpace(input)
-	
+
 	// Handle quit
 	if strings.ToLower(input) == "q" || input == "" {
 		return nil, nil
@@ -83,7 +83,7 @@ func (s *Selector) SelectWithFilter(filter string) (*worktree.Worktree, error) {
 	// Filter worktrees based on branch name
 	var filtered []*worktree.Worktree
 	filter = strings.ToLower(filter)
-	
+
 	for _, wt := range s.worktrees {
 		if strings.Contains(strings.ToLower(wt.Branch), filter) {
 			filtered = append(filtered, wt)
@@ -103,7 +103,7 @@ func (s *Selector) SelectWithFilter(filter string) (*worktree.Worktree, error) {
 	filteredSelector := NewSelector(filtered)
 	fmt.Printf("🔍 Filtered worktrees (matching '%s'):\n", filter)
 	fmt.Println()
-	
+
 	return filteredSelector.Select()
 }
 
