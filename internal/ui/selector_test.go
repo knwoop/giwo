@@ -14,7 +14,7 @@ func TestNewSelector(t *testing.T) {
 	}
 
 	selector := NewSelector(worktrees)
-	
+
 	if diff := cmp.Diff(len(worktrees), len(selector.worktrees)); diff != "" {
 		t.Errorf("NewSelector worktree count mismatch (-want +got):\n%s", diff)
 	}
@@ -60,10 +60,10 @@ func TestFormatWorktreeStatus(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			
+
 			selector := NewSelector([]*worktree.Worktree{tt.worktree})
 			result := selector.formatWorktreeStatus(tt.worktree)
-			
+
 			if diff := cmp.Diff(tt.expected, result); diff != "" {
 				t.Errorf("formatWorktreeStatus mismatch (-want +got):\n%s", diff)
 			}
