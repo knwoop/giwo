@@ -1,23 +1,23 @@
-# gwt - Git WorkTree Manager
+# giwo - Git WorkTree Manager
 
 A CLI tool for efficiently managing Git worktrees. Supports parallel work across multiple branches and manages the entire lifecycle of worktrees.
 
 ## Installation
 
 ```bash
-go install github.com/knwoop/gwt@latest
+go install github.com/knwoop/giwo@latest
 ```
 
 ## Commands
 
-### `gwt create <branch-name>`
+### `giwo create <branch-name>`
 
 Create a new worktree based on the default branch.
 
 ```bash
-gwt create feature-auth
-gwt create bugfix-login --base develop
-gwt create experiment-ui --force
+giwo create feature-auth
+giwo create bugfix-login --base develop
+giwo create experiment-ui --force
 ```
 
 **Options:**
@@ -30,14 +30,14 @@ gwt create experiment-ui --force
 - Copies config files (.env, .gitignore, .editorconfig, etc.)
 - Fetches default branch via GitHub API (requires GITHUB_TOKEN)
 
-### `gwt remove <branch-name>`
+### `giwo remove <branch-name>`
 
 Remove a worktree and optionally its local branch.
 
 ```bash
-gwt remove feature-auth
-gwt remove bugfix-login --keep-branch
-gwt remove old-feature --force
+giwo remove feature-auth
+giwo remove bugfix-login --keep-branch
+giwo remove old-feature --force
 ```
 
 **Aliases:** `rm`, `delete`
@@ -46,14 +46,14 @@ gwt remove old-feature --force
 - `--force` - Force removal without confirmation
 - `--keep-branch` - Keep the local branch after removing worktree
 
-### `gwt list`
+### `giwo list`
 
 Display all worktrees with status information.
 
 ```bash
-gwt list
-gwt list --verbose
-gwt list --format json
+giwo list
+giwo list --verbose
+giwo list --format json
 ```
 
 **Aliases:** `ls`
@@ -62,12 +62,12 @@ gwt list --format json
 - `--verbose` - Show detailed information (commits, changes, etc.)
 - `--format <table|json|simple>` - Output format
 
-### `gwt status`
+### `giwo status`
 
 Show worktree statistics and recommendations.
 
 ```bash
-gwt status
+giwo status
 ```
 
 **Output:**
@@ -76,14 +76,14 @@ gwt status
 - Merged branches that can be cleaned
 - Recommended actions
 
-### `gwt clean`
+### `giwo clean`
 
 Batch remove worktrees for merged branches.
 
 ```bash
-gwt clean
-gwt clean --dry-run
-gwt clean --force
+giwo clean
+giwo clean --dry-run
+giwo clean --force
 ```
 
 **Options:**
@@ -95,12 +95,37 @@ gwt clean --force
 - Excludes main/master/develop branches
 - Shows branch status before removal
 
-### `gwt prune`
+### `giwo switch [filter]`
+
+Switch to a worktree interactively with fuzzy search support.
+
+```bash
+giwo switch
+giwo switch feature
+giwo switch --fuzzy
+giwo switch --filter auth
+giwo switch --print
+```
+
+**Aliases:** `sw`
+
+**Options:**
+- `--fuzzy` - Use interactive fuzzy search (like fzf)
+- `--filter <text>` - Filter worktrees by branch name
+- `--print` - Print the selected worktree path instead of switching
+
+**Features:**
+- Interactive selection with numbered options
+- Fuzzy search with real-time filtering
+- Visual status indicators (clean/dirty, ahead/behind)
+- Shell integration support
+
+### `giwo prune`
 
 Remove administrative files for orphaned worktrees.
 
 ```bash
-gwt prune
+giwo prune
 ```
 
 Wrapper around `git worktree prune -v`.
@@ -126,25 +151,45 @@ project-root/
 └── main-worktree/        # Main worktree
 ```
 
+## Shell Integration
+
+For seamless directory switching, source the provided shell script:
+
+```bash
+# Add to your .bashrc or .zshrc
+source /path/to/giwo/scripts/giwo-switch.sh
+
+# Now you can use:
+gws                    # Interactive switch
+gwf                    # Fuzzy search
+giwo-switch --filter ui # Filter and switch
+```
+
 ## Examples
 
 ```bash
 # Create a new feature branch worktree
-gwt create feature-auth
+giwo create feature-auth
 
-# Work in the new worktree
-cd .worktree/feature-auth
+# Switch to a worktree interactively
+giwo switch
+
+# Use fuzzy search to find and switch
+giwo switch --fuzzy
+
+# Filter worktrees and switch
+giwo switch auth
 
 # List all worktrees
-gwt list --verbose
+giwo list --verbose
 
 # Check status and get recommendations
-gwt status
+giwo status
 
 # Clean up merged branches
-gwt clean --dry-run
-gwt clean
+giwo clean --dry-run
+giwo clean
 
 # Remove specific worktree
-gwt remove feature-auth
+giwo remove feature-auth
 ```
