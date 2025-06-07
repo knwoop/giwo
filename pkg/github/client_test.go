@@ -12,10 +12,10 @@ func TestParseGitHubURL(t *testing.T) {
 		expectedOwner string
 		expectedRepo  string
 	}{
-		"SSH URL":                {"git@github.com:knwoop/gwt.git", "knwoop", "gwt"},
-		"SSH URL without .git":   {"git@github.com:knwoop/gwt", "knwoop", "gwt"},
-		"HTTPS URL":              {"https://github.com/knwoop/gwt.git", "knwoop", "gwt"},
-		"HTTPS URL without .git": {"https://github.com/knwoop/gwt", "knwoop", "gwt"},
+		"SSH URL":                {"git@github.com:knwoop/giwo.git", "knwoop", "giwo"},
+		"SSH URL without .git":   {"git@github.com:knwoop/giwo", "knwoop", "giwo"},
+		"HTTPS URL":              {"https://github.com/knwoop/giwo.git", "knwoop", "giwo"},
+		"HTTPS URL without .git": {"https://github.com/knwoop/giwo", "knwoop", "giwo"},
 		"Invalid URL":            {"not-a-github-url", "", ""},
 		"Empty URL":              {"", "", ""},
 	} {

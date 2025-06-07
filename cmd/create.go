@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knwoop/gwt/internal/utils"
-	"github.com/knwoop/gwt/pkg/github"
-	"github.com/knwoop/gwt/pkg/worktree"
+	"github.com/knwoop/giwo/internal/utils"
+	"github.com/knwoop/giwo/pkg/github"
+	"github.com/knwoop/giwo/pkg/worktree"
 	"github.com/spf13/cobra"
 )
 

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/knwoop/gwt/internal/errors"
+	"github.com/knwoop/giwo/internal/errors"
 )
 
 // Git branch name restrictions based on git-check-ref-format.

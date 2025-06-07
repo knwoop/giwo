@@ -1,4 +1,4 @@
-module github.com/knwoop/gwt
+module github.com/knwoop/giwo
 
 go 1.24.3
 

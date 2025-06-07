@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knwoop/gwt/internal/errors"
+	"github.com/knwoop/giwo/internal/errors"
 )
 
 // Manager handles Git worktree operations.

@@ -1,6 +1,6 @@
 .PHONY: build test clean install lint fmt vet
 
-BINARY_NAME=gwt
+BINARY_NAME=giwo
 BUILD_DIR=bin
 INSTALL_PATH=/usr/local/bin
 

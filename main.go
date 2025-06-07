@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/knwoop/gwt/cmd"
+	"github.com/knwoop/giwo/cmd"
 )
 
 func main() {

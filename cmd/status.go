@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/knwoop/gwt/pkg/worktree"
+	"github.com/knwoop/giwo/pkg/worktree"
 	"github.com/spf13/cobra"
 )
 

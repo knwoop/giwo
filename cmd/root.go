@@ -8,9 +8,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gwt",
+	Use:   "giwo",
 	Short: "Git WorkTree Manager - Efficiently manage Git worktrees",
-	Long: `gwt is a CLI tool for efficiently managing Git worktrees.
+	Long: `giwo is a CLI tool for efficiently managing Git worktrees.
 It supports parallel work across multiple branches and manages 
 the entire lifecycle of worktrees.`,
 }
@@ -29,4 +29,5 @@ func init() {
 	rootCmd.AddCommand(statusCmd)
 	rootCmd.AddCommand(cleanCmd)
 	rootCmd.AddCommand(pruneCmd)
+	rootCmd.AddCommand(switchCmd)
 }
