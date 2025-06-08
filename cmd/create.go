@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/knwoop/giwo/internal/utils"
-	"github.com/knwoop/giwo/pkg/github"
 	"github.com/knwoop/giwo/pkg/worktree"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +17,7 @@ var createCmd = &cobra.Command{
 	Use:   "create <branch-name>",
 	Short: "Create a new worktree",
 	Long: `Create a new worktree based on the current branch.
-The worktree will be placed in .worktree/<branch-name> directory and 
+The worktree will be placed in .worktree/<branch-name> directory and
 automatically create and switch to the new branch.
 
 By default, the new worktree will be created from the current branch.
@@ -46,13 +44,7 @@ func runCreateCommand(cmd *cobra.Command, args []string) error {
 		// Use current branch as default
 		baseBranch, err = manager.GetCurrentBranch(ctx)
 		if err != nil {
-			// Fallback to repository default branch
-			fmt.Printf("⚠️  Warning: failed to get current branch, trying repository default: %v\n", err)
-			baseBranch, err = determineBaseBranch(ctx)
-			if err != nil {
-				fmt.Printf("⚠️  Warning: failed to determine base branch, using 'main': %v\n", err)
-				baseBranch = "main"
-			}
+			return fmt.Errorf("failed to get current branch: %w", err)
 		}
 	}
 
@@ -69,20 +61,6 @@ func runCreateCommand(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func determineBaseBranch(ctx context.Context) (string, error) {
-	owner, repo, err := github.GetRepoInfo(ctx)
-	if err != nil {
-		return "", fmt.Errorf("failed to get repo info: %w", err)
-	}
-
-	client := github.New()
-	baseBranch, err := client.GetDefaultBranch(ctx, owner, repo)
-	if err != nil {
-		return "", fmt.Errorf("failed to get default branch: %w", err)
-	}
-
-	return baseBranch, nil
-}
 
 func init() {
 	createCmd.Flags().BoolVar(&createForce, "force", false, "Force creation even if directory exists")
