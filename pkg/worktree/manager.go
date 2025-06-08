@@ -364,6 +364,34 @@ func (m *Manager) parseBranchList(output string) []string {
 
 // Helper functions
 
+// GetCurrentBranch returns the current branch name.
+func (m *Manager) GetCurrentBranch(ctx context.Context) (string, error) {
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "HEAD")
+	cmd.Dir = m.repoRoot
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current branch: %w", err)
+	}
+	
+	branch := strings.TrimSpace(string(output))
+	if branch == "HEAD" {
+		// We're in detached HEAD state, try to get symbolic name
+		cmd = exec.CommandContext(ctx, "git", "describe", "--contains", "--all", "HEAD")
+		cmd.Dir = m.repoRoot
+		output, err = cmd.Output()
+		if err != nil {
+			return "", fmt.Errorf("in detached HEAD state and cannot determine branch")
+		}
+		branch = strings.TrimSpace(string(output))
+		// Remove refs/heads/ prefix if present
+		if strings.HasPrefix(branch, "heads/") {
+			branch = strings.TrimPrefix(branch, "heads/")
+		}
+	}
+	
+	return branch, nil
+}
+
 // getGitRoot returns the root directory of the Git repository.
 func getGitRoot() (string, error) {
 	cmd := exec.Command("git", "rev-parse", "--show-toplevel")
