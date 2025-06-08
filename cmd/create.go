@@ -18,9 +18,12 @@ var (
 var createCmd = &cobra.Command{
 	Use:   "create <branch-name>",
 	Short: "Create a new worktree",
-	Long: `Create a new worktree based on the default branch.
+	Long: `Create a new worktree based on the current branch.
 The worktree will be placed in .worktree/<branch-name> directory and 
-automatically create and switch to the new branch.`,
+automatically create and switch to the new branch.
+
+By default, the new worktree will be created from the current branch.
+Use --base to specify a different base branch.`,
 	Args: cobra.ExactArgs(1),
 	RunE: runCreateCommand,
 }
@@ -40,10 +43,16 @@ func runCreateCommand(cmd *cobra.Command, args []string) error {
 
 	baseBranch := createBase
 	if baseBranch == "" {
-		baseBranch, err = determineBaseBranch(ctx)
+		// Use current branch as default
+		baseBranch, err = manager.GetCurrentBranch(ctx)
 		if err != nil {
-			fmt.Printf("⚠️  Warning: failed to determine base branch, using 'main': %v\n", err)
-			baseBranch = "main"
+			// Fallback to repository default branch
+			fmt.Printf("⚠️  Warning: failed to get current branch, trying repository default: %v\n", err)
+			baseBranch, err = determineBaseBranch(ctx)
+			if err != nil {
+				fmt.Printf("⚠️  Warning: failed to determine base branch, using 'main': %v\n", err)
+				baseBranch = "main"
+			}
 		}
 	}
 
@@ -77,5 +86,5 @@ func determineBaseBranch(ctx context.Context) (string, error) {
 
 func init() {
 	createCmd.Flags().BoolVar(&createForce, "force", false, "Force creation even if directory exists")
-	createCmd.Flags().StringVar(&createBase, "base", "", "Base branch to create worktree from (default: repository default branch)")
+	createCmd.Flags().StringVar(&createBase, "base", "", "Base branch to create worktree from (default: current branch)")
 }
